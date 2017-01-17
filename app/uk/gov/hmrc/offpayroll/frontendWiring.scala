@@ -16,18 +16,21 @@
 
 package uk.gov.hmrc.offpayroll
 
-import uk.gov.hmrc.offpayroll.connectors.DecisionConnector
+import play.api.Play
+import uk.gov.hmrc.offpayroll.connectors.{DecisionConnector, SessionCacheConnector}
 import uk.gov.hmrc.offpayroll.services.{FlowService, IR35FlowService}
 import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector => Auditing}
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.play.http.{HttpDelete, HttpGet, HttpPut}
 import uk.gov.hmrc.play.http.ws.{WSDelete, WSGet, WSPost, WSPut}
 
 
 trait ServiceRegistry extends ServicesConfig {
   lazy val decisionConnector: DecisionConnector = DecisionConnector
   lazy val flowservice: FlowService = IR35FlowService()
+  lazy val sessionCacheConnector: SessionCacheConnector =  SessionCacheConnector
 }
 
 object FrontendAuditConnector extends Auditing with AppName {
@@ -47,4 +50,14 @@ object DecisionConnector extends DecisionConnector with ServicesConfig {
   val decisionURL: String = baseUrl("off-payroll-decision")
   val serviceURL = "off-payroll-decision/decide"
   val http = WSHttp
+}
+
+object SessionCacheConnector extends SessionCacheConnector with ServicesConfig {
+  override val sessionKey: String = getConfString("keystore.sessionKey",
+    throw new RuntimeException("Could not find session key"))
+  override def defaultSource: String = Play.current.configuration.getString("appName").getOrElse("APP NAME NOT SET")
+  override def baseUri: String = baseUrl("keystore")
+  override def domain: String = getConfString("keystore.domain",
+    throw new RuntimeException("Could not find config keystore.domain"))
+  override def http: HttpGet with HttpPut with HttpDelete = WSHttp
 }

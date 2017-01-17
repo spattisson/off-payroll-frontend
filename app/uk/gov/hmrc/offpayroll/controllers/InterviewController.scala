@@ -26,6 +26,8 @@ import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{AnyContent, _}
 import play.mvc.BodyParser.AnyContent
 import play.twirl.api.Html
+import uk.gov.hmrc.offpayroll.SessionCacheConnector
+import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
 import uk.gov.hmrc.offpayroll.models.{Decision, Element, MULTI}
 import uk.gov.hmrc.offpayroll.services.{FlowService, FragmentService, IR35FlowService}
 import uk.gov.hmrc.passcode.authentication.{PasscodeAuthentication, PasscodeAuthenticationProvider, PasscodeVerificationConfig}
@@ -72,12 +74,13 @@ trait OffPayrollControllerHelper extends PasscodeAuthentication  {
 object InterviewController {
 
   def apply() = {
-    new InterviewController(IR35FlowService())
+    new InterviewController(IR35FlowService(), SessionCacheConnector)
 
   }
 }
 
-class InterviewController @Inject()(val flowService: FlowService) extends OffPayrollController {
+class InterviewController @Inject()(val flowService: FlowService, val sessionCacheConnector: SessionCacheConnector)
+  extends OffPayrollController {
 
   def begin = Action.async { implicit request =>
 

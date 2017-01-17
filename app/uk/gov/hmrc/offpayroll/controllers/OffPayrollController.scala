@@ -16,15 +16,32 @@
 
 package uk.gov.hmrc.offpayroll.controllers
 
-import uk.gov.hmrc.offpayroll.services.FragmentService
-import uk.gov.hmrc.play.frontend.controller.FrontendController
 import play.Logger
+import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
+import uk.gov.hmrc.offpayroll.services.FragmentService
+import uk.gov.hmrc.offpayroll.typeDefs.Interview
+import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 /**
   * Created by peter on 11/01/2017.
   */
-abstract class OffPayrollController extends FrontendController  with OffPayrollControllerHelper {
+abstract class OffPayrollController extends FrontendController
+  with OffPayrollControllerHelper {
 
   val fragmentService = FragmentService("/guidance/")
+  val sessionCacheConnector: SessionCacheConnector
+
+  protected def updateOrCreateInCache(found: (Interview) => Interview, notFound: () => Interview)
+                                     (implicit hc: HeaderCarrier) = {
+    sessionCacheConnector.get.flatMap {
+      case Some(interview) =>
+        Logger.info("Interview found merging new data")
+        sessionCacheConnector.put(found(interview))
+      case None =>
+        Logger.info("No Interview found creating new one")
+        sessionCacheConnector.put(notFound())
+    }
+  }
 
 }
