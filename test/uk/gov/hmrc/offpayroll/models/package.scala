@@ -33,6 +33,7 @@ package object resources {
   val setup_endUserRolePersonDoingWork = setup_endUserRole -> "setup.endUserRole.personDoingWork"
 
   val setup_hasContractStarted = "setup.hasContractStarted"
+  val setup_hasContractStartedNo = setup_hasContractStarted -> NO
 
   val officeHolderProperty = "exit.officeHolder"
 
@@ -43,7 +44,6 @@ package object resources {
   val setupLtdCompany = setup_provideServices -> "setup.provideServices.limitedCompany"
 
   val setup_SoleTrader = setup_provideServices -> "setup.provideServices.soleTrader"
-
 
 
   //EXIT
@@ -95,6 +95,9 @@ package object resources {
 
   val exit_conditionsLiabilityPartnership4 = "exit.conditionsLiabilityPartnership4"
   val exit_conditionsLiabilityPartnership4No = exit_conditionsLiabilityPartnership4 -> NO
+
+  val exit_conditionsLiabilityIndvidualIntermediary = "exit.conditionsLiabilityIndividualIntermediary"
+  val exit_conditionsLiabilityIndvidualIntermediaryYes = exit_conditionsLiabilityIndvidualIntermediary -> YES
 
   //PERSONAL SERVICE
 

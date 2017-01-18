@@ -21,6 +21,7 @@ import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.offpayroll.resources._
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 
@@ -34,18 +35,40 @@ class InterviewControllerSpec extends UnitSpec with WithFakeApplication with Sca
     }
   }
 
+  val interview1 = Map(setup_endUserRolePersonDoingWork, setup_hasContractStartedNo, setupIntermediary,
+    officeHolderNo, exit_conditionsLiabilityIndvidualIntermediaryYes).toSeq
+
   "POST /cluster/0/element/0" should {
     "return 200" in {
 
-      val request = FakeRequest().withFormUrlEncodedBody(
+      implicit val request = FakeRequest().withFormUrlEncodedBody(
         personalService_contractualObligationForSubstituteYes
-      )
+      ).withSession(interview1 :_*)
 
       val result = InterviewController().processElement(0,0)(request).futureValue
 
       status(result) shouldBe Status.OK
       contentAsString(result) should include(personalService_contractualObligationInPractise)
 
+      result.session.data.contains(personalService_contractualObligationForSubstitute) shouldBe true
+
     }
   }
+
+  val interview2 = interview1 :+ personalService_contractualObligationForSubstituteYes
+
+//  "GET /cluster/0/element/0" should {
+//    "result in the page being redisplayed and a blank interview from that point forward" in {
+//
+//      implicit val request = FakeRequest("GET", "/cluster/0/element/0").withSession(interview2 :_*)
+//      val result = InterviewController().display(0,0)(request).futureValue
+//
+//      status(result) shouldBe Status.OK
+//
+//      result.session.data.contains(personalService_contractualObligationForSubstitute) shouldBe false
+//
+//      contentAsString(result) should include(personalService_contractualObligationForSubstitute)
+//
+//    }
+//  }
 }

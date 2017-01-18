@@ -19,6 +19,7 @@ package uk.gov.hmrc.offpayroll.services
 import uk.gov.hmrc.offpayroll.PropertyFileLoader
 import uk.gov.hmrc.offpayroll.models.{OUT, UNKNOWN}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 /**
@@ -41,7 +42,7 @@ class FlowServiceIntegrationSpec extends UnitSpec with WithFakeApplication {
 
       result.continueWithQuestions should not be (true)
       result.element.isEmpty should be (true)
-      result.decision.get.decision should be (UNKNOWN)
+      result.decision.get.decision should be (OUT)
       result.decision.get.qa.forall(value => !value._1.contains(csrf)) should be (true)
 
     }

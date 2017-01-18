@@ -17,16 +17,20 @@
 package uk.gov.hmrc.offpayroll
 
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.offpayroll.models.{DecisionRequest, DecisionResponse}
+import uk.gov.hmrc.offpayroll.models.{DecisionRequest, DecisionResponse, SessionInterview}
+import uk.gov.hmrc.offpayroll.typeDefs.Interview
+
 
 /**
   * Created by peter on 12/12/2016.
   */
+
+
 package object modelsFormat {
 
   implicit val decideRequestFormatter: Format[DecisionRequest] = Json.format[DecisionRequest]
   implicit val decideResponseFormatter: Format[DecisionResponse] = Json.format[DecisionResponse]
-
+  implicit val interviewFormatter: Format[SessionInterview] = Json.format[SessionInterview]
 
 }
 
@@ -34,5 +38,4 @@ package object modelsFormat {
 package object typeDefs {
 
   type Interview = Map[String, String]
-
 }

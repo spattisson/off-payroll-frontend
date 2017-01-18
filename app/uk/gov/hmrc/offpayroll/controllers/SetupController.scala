@@ -25,6 +25,8 @@ import play.api.data.Forms.{single, _}
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.Action
 import play.twirl.api.Html
+import uk.gov.hmrc.offpayroll.SessionCacheConnector
+import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
 import uk.gov.hmrc.offpayroll.models.{Element, ExitReason, SetupCluster, SetupFlow}
 import uk.gov.hmrc.offpayroll.services.FragmentService
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -33,14 +35,14 @@ import scala.concurrent.Future
 
 
 object SetupController {
-  def apply = new SetupController
+  def apply = new SetupController(SessionCacheConnector)
 }
 
 
 /**
   * Created by peter on 09/01/2017.
   */
-class SetupController @Inject() extends OffPayrollController {
+class SetupController @Inject() (val sessionCacheConnector: SessionCacheConnector) extends OffPayrollController {
 
   val flow = SetupFlow
   val SETUP_CLUSTER_ID = 0
