@@ -48,7 +48,7 @@ class SetupController @Inject() (val sessionCacheConnector: SessionCacheConnecto
   val SETUP_CLUSTER_ID = 0
 
 
-  def begin(clusterId: Int = 0) = Action.async { implicit request =>
+  def begin(clusterId: Int = 0) = PasscodeAuthenticatedActionAsync { implicit request =>
 
     val element = flow.getStart()
 
@@ -66,7 +66,7 @@ class SetupController @Inject() (val sessionCacheConnector: SessionCacheConnecto
   }
 
 
-  def processElement(elementID: Int) = Action.async { implicit request =>
+  def processElement(elementID: Int) = PasscodeAuthenticatedActionAsync { implicit request =>
 
     val element = flow.getElementById(SETUP_CLUSTER_ID, elementID).getOrElse(flow.getStart())
     val fieldName = element.questionTag
