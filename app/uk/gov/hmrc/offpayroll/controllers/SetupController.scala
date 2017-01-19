@@ -18,18 +18,12 @@ package uk.gov.hmrc.offpayroll.controllers
 
 import javax.inject.Inject
 
-import play.Logger
 import play.api.Play.current
-import play.api.data.Form
-import play.api.data.Forms.{single, _}
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc.Action
 import play.twirl.api.Html
 import uk.gov.hmrc.offpayroll.SessionCacheConnector
 import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
-import uk.gov.hmrc.offpayroll.models.{Element, ExitReason, SetupCluster, SetupFlow}
-import uk.gov.hmrc.offpayroll.services.FragmentService
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.offpayroll.models.{ExitReason, SetupFlow}
 
 import scala.concurrent.Future
 

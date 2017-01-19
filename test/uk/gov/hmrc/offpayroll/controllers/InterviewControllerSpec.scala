@@ -26,12 +26,15 @@ import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.offpayroll.{FrontendAppConfig, WithTestFakeApplication}
 import uk.gov.hmrc.offpayroll.resources._
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.SessionId
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 
 class InterviewControllerSpec extends UnitSpec with WithTestFakeApplication with ScalaFutures {
 
   override def configFile: String = "test-application.conf"
+
+  implicit val hc = new HeaderCarrier(sessionId = Option(new SessionId("12345")))
 
   "GET /cluster/" should {
     "return 200" in {
@@ -49,7 +52,7 @@ class InterviewControllerSpec extends UnitSpec with WithTestFakeApplication with
 
       implicit val request = FakeRequest().withFormUrlEncodedBody(
         personalService_contractualObligationForSubstituteYes
-      ).withSession(interview1 :_*)
+      ).withSession(interview1 :_*).
 
       val result = InterviewController().processElement(0,0)(request).futureValue
 

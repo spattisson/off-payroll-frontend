@@ -18,10 +18,8 @@ package uk.gov.hmrc.offpayroll.controllers
 
 import javax.inject.Inject
 
-import play.Logger
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc._
 import play.twirl.api.Html
 import uk.gov.hmrc.offpayroll.SessionCacheConnector
 import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
