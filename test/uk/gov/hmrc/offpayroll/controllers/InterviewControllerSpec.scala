@@ -52,7 +52,7 @@ class InterviewControllerSpec extends UnitSpec with WithTestFakeApplication with
 
       implicit val request = FakeRequest().withFormUrlEncodedBody(
         personalService_contractualObligationForSubstituteYes
-      ).withSession(interview1 :_*).
+      ).withSession(interview1 :_*)
 
       val result = InterviewController().processElement(0,0)(request).futureValue
 
