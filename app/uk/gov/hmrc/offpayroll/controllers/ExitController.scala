@@ -21,7 +21,7 @@ import javax.inject.Inject
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.twirl.api.Html
-import uk.gov.hmrc.offpayroll.SessionCacheConnector
+import uk.gov.hmrc.offpayroll.FrontendSessionCacheConnector
 import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
 import uk.gov.hmrc.offpayroll.models.{ExitFlow, ExitReason}
 
@@ -33,7 +33,7 @@ import scala.concurrent.Future
 
 
 object ExitController {
-  def apply = new ExitController(SessionCacheConnector)
+  def apply = new ExitController(new FrontendSessionCacheConnector)
 }
 
 class ExitController @Inject() (val sessionCacheConnector: SessionCacheConnector) extends OffPayrollController {

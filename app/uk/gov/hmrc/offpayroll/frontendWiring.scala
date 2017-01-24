@@ -31,7 +31,7 @@ import uk.gov.hmrc.play.http.ws.{WSDelete, WSGet, WSPost, WSPut}
 trait ServiceRegistry extends ServicesConfig {
   lazy val decisionConnector: DecisionConnector = new FrontendDecisionConnector
   lazy val flowservice: FlowService = IR35FlowService()
-  lazy val sessionCacheConnector: SessionCacheConnector =  SessionCacheConnector
+  lazy val sessionCacheConnector: SessionCacheConnector =  new FrontendSessionCacheConnector
 }
 
 object FrontendAuditConnector extends Auditing with AppName {
@@ -54,7 +54,7 @@ class FrontendDecisionConnector extends DecisionConnector with ServicesConfig {
   val http = WSHttp
 }
 
-object SessionCacheConnector extends SessionCacheConnector with ServicesConfig {
+class FrontendSessionCacheConnector extends SessionCacheConnector with ServicesConfig {
   override val sessionKey: String = getConfString("keystore.sessionKey",
     throw new RuntimeException("Could not find session key"))
   override def defaultSource: String = Play.current.configuration.getString("appName").getOrElse("APP NAME NOT SET")

@@ -16,31 +16,55 @@
 
 package uk.gov.hmrc.offpayroll.controllers
 
-import com.typesafe.config.{ConfigFactory, ConfigValueFactory}
 import org.scalatest.concurrent.ScalaFutures
-import play.GlobalSettings
-import play.api.Configuration
+import org.scalatest.mockito.MockitoSugar
 import play.api.http.Status
-import play.api.test.{FakeApplication, FakeRequest}
+import play.api.mvc.Request
+import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
-import uk.gov.hmrc.offpayroll.{FrontendAppConfig, WithTestFakeApplication}
+import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
 import uk.gov.hmrc.offpayroll.resources._
-import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.SessionId
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.offpayroll.services.{IR35FlowService, InterviewEvaluation}
+import uk.gov.hmrc.offpayroll.{FrontendDecisionConnector, WithTestFakeApplication}
+import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.play.http.{HttpDelete, HttpGet, HttpPut}
+import uk.gov.hmrc.play.test.UnitSpec
+
+import scala.concurrent.Future
 
 
-class InterviewControllerSpec extends UnitSpec with WithTestFakeApplication with ScalaFutures {
+
+class InterviewControllerSpec extends UnitSpec with MockitoSugar with WithTestFakeApplication with ScalaFutures {
 
   override def configFile: String = "test-application.conf"
 
-  implicit val hc = new HeaderCarrier(sessionId = Option(new SessionId("12345")))
+  val TEST_SESSION_ID = "41c1fc6444bb7e"
+
+  class TestSessionHelper extends SessionHelper {
+    override def createCorrelationId(request: Request[_]): String = TEST_SESSION_ID
+  }
+
+  class InstrumentedIR35FlowService extends IR35FlowService(new FrontendDecisionConnector) {
+    var passedCorrelationId = ""
+    override def evaluateInterview(interview: Map[String, String], currentQnA: (String, String), correlationId: String): Future[InterviewEvaluation] = {
+      val futureInterviewEvaluation = super.evaluateInterview(interview, currentQnA, correlationId)
+      passedCorrelationId = correlationId
+      futureInterviewEvaluation
+    }
+  }
+
+  object TestSessionCacheConnector extends SessionCacheConnector {
+    override val sessionKey: String = "sessionId"
+    override def defaultSource: String = "test"
+    override def baseUri: String = "http://localhost"
+    override def domain: String = "ofpayroll"
+    override def http: HttpGet with HttpPut with HttpDelete  = mock[WSHttp]
+  }
 
   "GET /cluster/" should {
     "return 200" in {
       val result = await(InterviewController().begin.apply(FakeRequest("GET", "/cluster/")))
       status(result) shouldBe Status.OK
-      contentAsString(result) should include(personalService_contractualObligationForSubstitute)
     }
   }
 
@@ -50,16 +74,44 @@ class InterviewControllerSpec extends UnitSpec with WithTestFakeApplication with
   "POST /cluster/0/element/0" should {
     "return 200" in {
 
+//      implicit val request = FakeRequest().withFormUrlEncodedBody(
+//        personalService_contractualObligationForSubstituteYes
+//      ).withSession(interview1 :_*)
+
       implicit val request = FakeRequest().withFormUrlEncodedBody(
         personalService_contractualObligationForSubstituteYes
       ).withSession(interview1 :_*)
 
-      val result = InterviewController().processElement(0,0)(request).futureValue
+      val result = new InterviewController(IR35FlowService(), TestSessionCacheConnector,
+        new TestSessionHelper()).processElement(0, 0)(request).futureValue
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include(personalService_contractualObligationInPractise)
+    }
+  }
 
+  "POST /cluster/0/element/0 without a cookie" should {
+    "intercept an exception" in {
+      val request = FakeRequest().withFormUrlEncodedBody(
+        personalService_contractualObligationForSubstituteYes
+      )
+      intercept[NoSuchElementException]{InterviewController().processElement(0, 0)(request).futureValue}
+    }
+  }
+
+  "POST /cluster/0/element/0 with test correlation id" should {
+    "return 200" in {
+      val request = FakeRequest().withFormUrlEncodedBody(
+        personalService_contractualObligationForSubstituteYes
+      )
+      val flowService = new InstrumentedIR35FlowService
+      val result = new InterviewController(flowService, TestSessionCacheConnector, new TestSessionHelper()).processElement(0, 0)(request).futureValue
       status(result) shouldBe Status.OK
       contentAsString(result) should include(personalService_contractualObligationInPractise)
 
-      result.session.data.contains(personalService_contractualObligationForSubstitute) shouldBe true
+
+//      result.session.data.contains(personalService_contractualObligationForSubstitute) shouldBe true
+
+      flowService.passedCorrelationId shouldBe TEST_SESSION_ID
 
     }
   }

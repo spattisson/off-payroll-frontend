@@ -21,7 +21,7 @@ import javax.inject.Inject
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.twirl.api.Html
-import uk.gov.hmrc.offpayroll.SessionCacheConnector
+import uk.gov.hmrc.offpayroll.FrontendSessionCacheConnector
 import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
 import uk.gov.hmrc.offpayroll.models.{ExitReason, SetupFlow}
 
@@ -29,7 +29,7 @@ import scala.concurrent.Future
 
 
 object SetupController {
-  def apply = new SetupController(SessionCacheConnector)
+  def apply = new SetupController(new FrontendSessionCacheConnector)
 }
 
 

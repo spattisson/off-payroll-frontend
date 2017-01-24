@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.offpayroll.connectors
 
+import com.google.inject.ImplementedBy
 import play.api.libs.json.{Reads, Writes}
 import uk.gov.hmrc.http.cache.client.SessionCache
+import uk.gov.hmrc.offpayroll.FrontendSessionCacheConnector
 import uk.gov.hmrc.offpayroll.models.SessionInterview
 import uk.gov.hmrc.offpayroll.modelsFormat._
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -26,6 +28,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 /**
   * Created by peter on 17/01/2017.
   */
+@ImplementedBy(classOf[FrontendSessionCacheConnector])
 trait SessionCacheConnector extends SessionCache with ServicesConfig {
   val sessionKey: String
 
