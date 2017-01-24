@@ -16,10 +16,18 @@
 
 package uk.gov.hmrc.offpayroll
 
-import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.offpayroll.models.{DecisionRequest, DecisionResponse, SessionInterview}
+import play.api.libs.json.{Format, Json, Writes}
+import uk.gov.hmrc.offpayroll.models.{DecisionRequest, DecisionResponse, QuestionAndAnswer, SessionInterview}
 import uk.gov.hmrc.offpayroll.typeDefs.Interview
 import uk.gov.hmrc.play.http.HeaderCarrier
+
+import play.api.libs.json.{JsPath, Writes}
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
+
+import play.api.libs.json._ // JSON library
+import play.api.libs.json.Reads._ // Custom validation helpers
+import play.api.libs.functional.syntax._ // Combinator syntax
 
 
 /**
@@ -29,9 +37,36 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 package object modelsFormat {
 
+
+  implicit val questionAnswerWrites = new Writes[QuestionAndAnswer] {
+    def writes(qAndA: QuestionAndAnswer) = Json.obj(
+      "questionTag" -> qAndA.questionTag,
+      "answer" -> qAndA.answer
+    )
+  }
+
+  implicit val questionAnswerReads: Reads[QuestionAndAnswer] = (
+    (JsPath \ "questionTag").read[String] and
+      (JsPath \ "answer").read[String]
+    )(QuestionAndAnswer.apply _)
+
+
+  val sessionInterviewWrites = new Writes[SessionInterview] {
+    def writes(sessionInterview: SessionInterview) = Json.obj(
+      "version" -> sessionInterview.version,
+      "interview" -> sessionInterview.interview
+    )
+  }
+
+  val sessionIntervieReads: Reads[SessionInterview] = (
+    (JsPath \ "version").read[String] and
+    (JsPath \ "interview").read[Seq[QuestionAndAnswer]]
+    )(SessionInterview.apply _)
+
+
   implicit val decideRequestFormatter: Format[DecisionRequest] = Json.format[DecisionRequest]
   implicit val decideResponseFormatter: Format[DecisionResponse] = Json.format[DecisionResponse]
-  implicit val interviewFormatter: Format[SessionInterview] = Json.format[SessionInterview]
+  implicit val interviewFormatter: Format[SessionInterview] = Format(sessionIntervieReads, sessionInterviewWrites)
   implicit val hc = HeaderCarrier()
 
 

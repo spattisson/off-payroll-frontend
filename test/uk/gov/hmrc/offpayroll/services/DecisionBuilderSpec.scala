@@ -51,7 +51,7 @@ class DecisionBuilderSpec  extends FlatSpec with Matchers {
       |}
     """.stripMargin
 
-  val expectedDecisionRequest = Json.fromJson[DecisionRequest](Json.parse(decisionRequestStringPlusControl)).get
+  val expectedDecisionRequest: DecisionRequest = Json.fromJson[DecisionRequest](Json.parse(decisionRequestStringPlusControl)).get
 
   "A DecisionBuilder " should "build a DecisionRequest from the current Interview in the Sesssion" in {
     val decisionRequest: DecisionRequest = DecisionBuilder.buildDecisionRequest(interview, TEST_CORRELATION_ID)
