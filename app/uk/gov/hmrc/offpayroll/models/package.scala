@@ -19,6 +19,7 @@ package uk.gov.hmrc.offpayroll
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.offpayroll.models.{DecisionRequest, DecisionResponse, SessionInterview}
 import uk.gov.hmrc.offpayroll.typeDefs.Interview
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 
 /**
@@ -31,6 +32,8 @@ package object modelsFormat {
   implicit val decideRequestFormatter: Format[DecisionRequest] = Json.format[DecisionRequest]
   implicit val decideResponseFormatter: Format[DecisionResponse] = Json.format[DecisionResponse]
   implicit val interviewFormatter: Format[SessionInterview] = Json.format[SessionInterview]
+  implicit val hc = HeaderCarrier()
+
 
 }
 

@@ -16,12 +16,14 @@
 
 package uk.gov.hmrc.offpayroll.services
 
+import javax.inject.Inject
+
 import com.google.inject.ImplementedBy
 import play.api.Logger
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import uk.gov.hmrc.offpayroll.FrontendDecisionConnector
 import uk.gov.hmrc.offpayroll.connectors.DecisionConnector
 import uk.gov.hmrc.offpayroll.models.{OffPayrollWebflow, UNKNOWN, _}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import uk.gov.hmrc.offpayroll.DecisionConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -46,20 +48,18 @@ abstract class FlowService {
 }
 
 object IR35FlowService {
-  def apply() = new IR35FlowService
+  def apply() = new IR35FlowService(new FrontendDecisionConnector)
 }
 
 
+class IR35FlowService @Inject() (val decisionConnector: DecisionConnector) extends FlowService {
 
-class IR35FlowService extends FlowService {
 
   private val STOP = false
   private val CONTINUE = true
   implicit val hc = HeaderCarrier()
 
   private val webflow = OffPayrollWebflow
-
-  lazy val decisionConnector: DecisionConnector = DecisionConnector
 
   override def getStart(): Element = webflow.getStart()
 
@@ -88,11 +88,11 @@ class IR35FlowService extends FlowService {
         decision => {
           Logger.debug("Decision received from Decision Service: " + decision)
             if (getStatus(decision) == UNKNOWN) {
-              if (webflow.getNext(currentElement).isEmpty) {
+              if (webflow.getNext(currentElement, true).isEmpty) {
                 InterviewEvaluation(Option.empty[Element], Option(Decision(cleanInterview, UNKNOWN)), STOP)
               }
               else
-                InterviewEvaluation(webflow.getNext(currentElement), Option.empty[Decision], CONTINUE)
+                InterviewEvaluation(webflow.getNext(currentElement, true), Option.empty[Decision], CONTINUE)
             } else {
                 InterviewEvaluation(Option.empty[Element], Option.apply(Decision(cleanInterview, getStatus(decision))), STOP)
             }
