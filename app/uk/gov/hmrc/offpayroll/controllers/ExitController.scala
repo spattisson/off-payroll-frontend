@@ -33,10 +33,10 @@ import scala.concurrent.Future
 
 
 object ExitController {
-  def apply = new ExitController(new FrontendSessionCacheConnector)
+  def apply = new ExitController()
 }
 
-class ExitController @Inject() (val sessionCacheConnector: SessionCacheConnector) extends OffPayrollController {
+class ExitController @Inject() () extends OffPayrollController {
 
   val flow = ExitFlow
   val EXIT_CLUSTER_ID: Int = 0

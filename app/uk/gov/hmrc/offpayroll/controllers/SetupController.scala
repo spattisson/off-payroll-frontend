@@ -29,14 +29,14 @@ import scala.concurrent.Future
 
 
 object SetupController {
-  def apply = new SetupController(new FrontendSessionCacheConnector)
+  def apply = new SetupController()
 }
 
 
 /**
   * Created by peter on 09/01/2017.
   */
-class SetupController @Inject() (val sessionCacheConnector: SessionCacheConnector) extends OffPayrollController {
+class SetupController @Inject() () extends OffPayrollController {
 
   val flow = SetupFlow
   val SETUP_CLUSTER_ID = 0

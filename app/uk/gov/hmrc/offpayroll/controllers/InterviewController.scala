@@ -74,11 +74,11 @@ trait OffPayrollControllerHelper extends PasscodeAuthentication  {
 
 object InterviewController {
   def apply() = {
-    new InterviewController(IR35FlowService(), new FrontendSessionCacheConnector, new SessionHelper)
+    new InterviewController(IR35FlowService(), new SessionHelper)
   }
 }
 
-class InterviewController @Inject()(val flowService: FlowService, val sessionCacheConnector: SessionCacheConnector, val sessionHelper: SessionHelper)
+class InterviewController @Inject()(val flowService: FlowService, val sessionHelper: SessionHelper)
   extends OffPayrollController {
 
   def begin = PasscodeAuthenticatedActionAsync { implicit request =>

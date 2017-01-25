@@ -82,7 +82,7 @@ class InterviewControllerSpec extends UnitSpec with MockitoSugar with WithTestFa
         personalService_contractualObligationForSubstituteYes
       ).withSession(interview1 :_*)
 
-      val result = new InterviewController(IR35FlowService(), TestSessionCacheConnector,
+      val result = new InterviewController(IR35FlowService(),
         new TestSessionHelper()).processElement(0, 0)(request).futureValue
       status(result) shouldBe Status.OK
       contentAsString(result) should include(personalService_contractualObligationInPractise)
@@ -104,7 +104,7 @@ class InterviewControllerSpec extends UnitSpec with MockitoSugar with WithTestFa
         personalService_contractualObligationForSubstituteYes
       )
       val flowService = new InstrumentedIR35FlowService
-      val result = new InterviewController(flowService, TestSessionCacheConnector, new TestSessionHelper()).processElement(0, 0)(request).futureValue
+      val result = new InterviewController(flowService, new TestSessionHelper()).processElement(0, 0)(request).futureValue
       status(result) shouldBe Status.OK
       contentAsString(result) should include(personalService_contractualObligationInPractise)
 
