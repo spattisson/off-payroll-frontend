@@ -16,14 +16,19 @@
 
 package uk.gov.hmrc.offpayroll.connectors
 
+import javax.inject.Inject
+
 import com.google.inject.ImplementedBy
+import play.Logger
 import play.api.libs.json.{Reads, Writes}
 import uk.gov.hmrc.http.cache.client.SessionCache
-import uk.gov.hmrc.offpayroll.FrontendSessionCacheConnector
-import uk.gov.hmrc.offpayroll.models.SessionInterview
+import uk.gov.hmrc.offpayroll.{FrontendAppConfig, FrontendSessionCacheConnector}
+import uk.gov.hmrc.offpayroll.models.{QuestionAndAnswer, SessionInterview}
 import uk.gov.hmrc.offpayroll.modelsFormat._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /**
   * Created by peter on 17/01/2017.
@@ -35,5 +40,48 @@ trait SessionCacheConnector extends SessionCache with ServicesConfig {
   def put(body: SessionInterview)(implicit writes: Writes[SessionInterview], hc: HeaderCarrier) = cache[SessionInterview](sessionKey, body)
 
   def get(implicit hc: HeaderCarrier, reads: Reads[SessionInterview]) = fetchAndGetEntry[SessionInterview](sessionKey)
+
+
+
+}
+
+class SessionCacheHelper @Inject()(sessionCacheConnector: SessionCacheConnector) {
+
+  val decisionServiceSchemaVersion: String = FrontendAppConfig.decisionServiceSchemaVersion
+
+  def createNew (implicit hc: HeaderCarrier) = {
+    val emptyInterview = SessionInterview(decisionServiceSchemaVersion, Seq())
+
+    sessionCacheConnector.get.flatMap {
+      case Some(existinginterview) =>
+        Logger.info("Existing Interview found creating new")
+        sessionCacheConnector.remove()
+        sessionCacheConnector.put(emptyInterview)
+      case None =>
+        Logger.info("No Interview found creating new one")
+        sessionCacheConnector.put(emptyInterview)
+    }
+
+  }
+
+
+  def addEntry(questionTag: String, answer: String) (implicit hc: HeaderCarrier)  = {
+
+    def merge(existinginterview: SessionInterview): SessionInterview = {
+      SessionInterview(existinginterview.version, existinginterview.interview :+ QuestionAndAnswer(questionTag, answer))
+    }
+
+    sessionCacheConnector.get.flatMap {
+      case Some(existinginterview) =>
+        Logger.info("Exisiting Interview merging values")
+        sessionCacheConnector.put(merge(existinginterview))
+      case None =>
+        Logger.info("No Interview found creating new one")
+        sessionCacheConnector.put(SessionInterview(decisionServiceSchemaVersion,
+          Seq(QuestionAndAnswer(questionTag,answer))))
+    }
+
+  }
+
 
 }

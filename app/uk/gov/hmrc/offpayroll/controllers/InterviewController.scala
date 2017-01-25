@@ -24,16 +24,12 @@ import play.api.data.Forms._
 import play.api.data._
 import play.api.mvc._
 import play.twirl.api.Html
-
 import uk.gov.hmrc.offpayroll.FrontendSessionCacheConnector
 import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
 import uk.gov.hmrc.offpayroll.models.{Decision, Element, MULTI}
-import uk.gov.hmrc.offpayroll.services.{FlowService, FragmentService, IR35FlowService}
-
+import uk.gov.hmrc.offpayroll.services.{FlowService, FragmentService, IR35FlowService, SessionHelper}
 import uk.gov.hmrc.offpayroll.filters.SessionIdFilter._
 import uk.gov.hmrc.offpayroll.models.Element
-import uk.gov.hmrc.offpayroll.services.{FlowService, IR35FlowService}
-
 import uk.gov.hmrc.passcode.authentication.{PasscodeAuthentication, PasscodeAuthenticationProvider, PasscodeVerificationConfig}
 import play.api.i18n.Messages.Implicits._
 
@@ -75,13 +71,6 @@ trait OffPayrollControllerHelper extends PasscodeAuthentication  {
 
 }
 
-class SessionHelper {
-  def createCorrelationId(request:Request[_]) =
-    request.cookies.get(OPF_SESSION_ID_COOKIE).map(_.value) match {
-      case None => throw new NoSuchElementException("session id not found in the cookie")
-      case Some(value) => value
-    }
-}
 
 object InterviewController {
   def apply() = {

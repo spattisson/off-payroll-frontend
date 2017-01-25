@@ -24,7 +24,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
 import uk.gov.hmrc.offpayroll.resources._
-import uk.gov.hmrc.offpayroll.services.{IR35FlowService, InterviewEvaluation}
+import uk.gov.hmrc.offpayroll.services.{IR35FlowService, InterviewEvaluation, SessionHelper}
 import uk.gov.hmrc.offpayroll.{FrontendDecisionConnector, WithTestFakeApplication}
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.http.{HttpDelete, HttpGet, HttpPut}

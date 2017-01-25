@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.offpayroll.controllers
+package uk.gov.hmrc.offpayroll.services
 
-import play.Logger
-import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
-import uk.gov.hmrc.offpayroll.models.SessionInterview
-import uk.gov.hmrc.offpayroll.modelsFormat._
-import uk.gov.hmrc.offpayroll.services.FragmentService
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import uk.gov.hmrc.play.http.HeaderCarrier
-import views.html.defaultpages.notFound
+import play.api.mvc.Request
+import uk.gov.hmrc.offpayroll.filters.SessionIdFilter.OPF_SESSION_ID_COOKIE
 
 /**
-  * Created by peter on 11/01/2017.
+  * Created by peter on 25/01/2017.
   */
-abstract class OffPayrollController extends FrontendController with OffPayrollControllerHelper {
-
-  val fragmentService = FragmentService("/guidance/")
-
-
+class SessionHelper {
+  def createCorrelationId(request:Request[_]) =
+    request.cookies.get(OPF_SESSION_ID_COOKIE).map(_.value) match {
+      case None => throw new NoSuchElementException("session id not found in the cookie")
+      case Some(value) => value
+    }
 }
