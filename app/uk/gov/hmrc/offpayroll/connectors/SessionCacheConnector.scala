@@ -42,7 +42,6 @@ trait SessionCacheConnector extends SessionCache with ServicesConfig {
   def get(implicit hc: HeaderCarrier, reads: Reads[SessionInterview]) = fetchAndGetEntry[SessionInterview](sessionKey)
 
 
-
 }
 
 class SessionCacheHelper @Inject()(sessionCacheConnector: SessionCacheConnector) {
@@ -68,7 +67,10 @@ class SessionCacheHelper @Inject()(sessionCacheConnector: SessionCacheConnector)
   def addEntry(questionTag: String, answer: String) (implicit hc: HeaderCarrier)  = {
 
     def merge(existinginterview: SessionInterview): SessionInterview = {
-      SessionInterview(existinginterview.version, existinginterview.interview :+ QuestionAndAnswer(questionTag, answer))
+      val interview = existinginterview.interview
+        .filterNot(qAndA => qAndA.questionTag == questionTag) :+ QuestionAndAnswer(questionTag, answer)
+
+      SessionInterview(existinginterview.version, interview)
     }
 
     sessionCacheConnector.get.flatMap {

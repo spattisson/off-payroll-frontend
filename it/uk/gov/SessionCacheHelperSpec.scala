@@ -29,10 +29,10 @@ class SessionCacheHelperSpec extends UnitSpec with WithFakeApplication {
   "An SessionCacheHelper " should {
     "be able to update or create entries in Keystore" in {
 
-//      val result = await(new SessionCacheHelper(new FrontendSessionCacheConnector).createNew)
-//
-//      val sessionInterview: Option[SessionInterview] = checkExtractSessionInteview(result)
-//      sessionInterview.get.interview.isEmpty shouldBe true
+      val result = await(new SessionCacheHelper(new FrontendSessionCacheConnector).createNew)
+
+      val sessionInterview: Option[SessionInterview] = checkExtractSessionInteview(result)
+      sessionInterview.get.interview.isEmpty shouldBe true
 
     }
   }
@@ -46,10 +46,30 @@ class SessionCacheHelperSpec extends UnitSpec with WithFakeApplication {
 
   "Be able to add a single entry" in {
 
+    await(new SessionCacheHelper(new FrontendSessionCacheConnector).createNew)
     val result = await(new SessionCacheHelper(new FrontendSessionCacheConnector).addEntry("someTag", "no"))
 
     val sessionInterview: Option[SessionInterview] = checkExtractSessionInteview(result)
+
+    val interview = sessionInterview.get.interview
+    interview.isEmpty shouldBe false
+    interview.size shouldBe 1
+
+    interview.exists(qAndA => qAndA.questionTag == "someTag" && qAndA.answer == "no") shouldBe true
+
+  }
+
+  "Be able to update a single entry" in {
+
+    await(new SessionCacheHelper(new FrontendSessionCacheConnector).createNew)
+    await(new SessionCacheHelper(new FrontendSessionCacheConnector).addEntry("someTag", "no"))
+    val result = await(new SessionCacheHelper(new FrontendSessionCacheConnector).addEntry("someTag", "yes"))
+
+    val sessionInterview: Option[SessionInterview] = checkExtractSessionInteview(result)
     sessionInterview.get.interview.isEmpty shouldBe false
+    sessionInterview.get.interview.size shouldBe 1
+    sessionInterview.get.interview.exists(qAndA => qAndA.questionTag == "someTag" && qAndA.answer == "no") shouldBe false
+    sessionInterview.get.interview.exists(qAndA => qAndA.questionTag == "someTag" && qAndA.answer == "yes") shouldBe true
   }
 
 }
