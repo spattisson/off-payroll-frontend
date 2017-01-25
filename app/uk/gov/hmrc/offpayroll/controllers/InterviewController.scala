@@ -25,7 +25,7 @@ import play.api.data._
 import play.api.mvc._
 import play.twirl.api.Html
 import uk.gov.hmrc.offpayroll.FrontendSessionCacheConnector
-import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
+import uk.gov.hmrc.offpayroll.connectors.{SessionCacheConnector, SessionCacheHelper}
 import uk.gov.hmrc.offpayroll.models.{Decision, Element, MULTI}
 import uk.gov.hmrc.offpayroll.services.{FlowService, FragmentService, IR35FlowService, SessionHelper}
 import uk.gov.hmrc.offpayroll.filters.SessionIdFilter._
@@ -74,11 +74,13 @@ trait OffPayrollControllerHelper extends PasscodeAuthentication  {
 
 object InterviewController {
   def apply() = {
-    new InterviewController(IR35FlowService(), new SessionHelper)
+    new InterviewController(IR35FlowService(), new SessionHelper,  SessionCacheHelper())
   }
 }
 
-class InterviewController @Inject()(val flowService: FlowService, val sessionHelper: SessionHelper)
+class InterviewController @Inject()(val flowService: FlowService,
+                                    val sessionHelper: SessionHelper,
+                                    val sessionCacheHelper: SessionCacheHelper)
   extends OffPayrollController {
 
   def begin = PasscodeAuthenticatedActionAsync { implicit request =>

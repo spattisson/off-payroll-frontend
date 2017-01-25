@@ -44,6 +44,10 @@ trait SessionCacheConnector extends SessionCache with ServicesConfig {
 
 }
 
+object SessionCacheHelper {
+  def apply() = new SessionCacheHelper(new FrontendSessionCacheConnector)
+}
+
 class SessionCacheHelper @Inject()(sessionCacheConnector: SessionCacheConnector) {
 
   val decisionServiceSchemaVersion: String = FrontendAppConfig.decisionServiceSchemaVersion

@@ -22,7 +22,7 @@ import play.api.http.Status
 import play.api.mvc.Request
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
-import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
+import uk.gov.hmrc.offpayroll.connectors.{SessionCacheConnector, SessionCacheHelper}
 import uk.gov.hmrc.offpayroll.resources._
 import uk.gov.hmrc.offpayroll.services.{IR35FlowService, InterviewEvaluation, SessionHelper}
 import uk.gov.hmrc.offpayroll.{FrontendDecisionConnector, WithTestFakeApplication}
@@ -61,6 +61,10 @@ class InterviewControllerSpec extends UnitSpec with MockitoSugar with WithTestFa
     override def http: HttpGet with HttpPut with HttpDelete  = mock[WSHttp]
   }
 
+  object SessionCacheHelper {
+    def apply() = new SessionCacheHelper(TestSessionCacheConnector)
+  }
+
   "GET /cluster/" should {
     "return 200" in {
       val result = await(InterviewController().begin.apply(FakeRequest("GET", "/cluster/")))
@@ -83,7 +87,7 @@ class InterviewControllerSpec extends UnitSpec with MockitoSugar with WithTestFa
       ).withSession(interview1 :_*)
 
       val result = new InterviewController(IR35FlowService(),
-        new TestSessionHelper()).processElement(0, 0)(request).futureValue
+        new TestSessionHelper(), SessionCacheHelper()).processElement(0, 0)(request).futureValue
       status(result) shouldBe Status.OK
       contentAsString(result) should include(personalService_contractualObligationInPractise)
     }
@@ -104,7 +108,8 @@ class InterviewControllerSpec extends UnitSpec with MockitoSugar with WithTestFa
         personalService_contractualObligationForSubstituteYes
       )
       val flowService = new InstrumentedIR35FlowService
-      val result = new InterviewController(flowService, new TestSessionHelper()).processElement(0, 0)(request).futureValue
+      val result = new InterviewController(flowService,
+        new TestSessionHelper(), SessionCacheHelper()).processElement(0, 0)(request).futureValue
       status(result) shouldBe Status.OK
       contentAsString(result) should include(personalService_contractualObligationInPractise)
 

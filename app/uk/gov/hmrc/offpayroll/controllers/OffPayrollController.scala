@@ -17,7 +17,7 @@
 package uk.gov.hmrc.offpayroll.controllers
 
 import play.Logger
-import uk.gov.hmrc.offpayroll.connectors.SessionCacheConnector
+import uk.gov.hmrc.offpayroll.connectors.{SessionCacheConnector, SessionCacheHelper}
 import uk.gov.hmrc.offpayroll.models.SessionInterview
 import uk.gov.hmrc.offpayroll.modelsFormat._
 import uk.gov.hmrc.offpayroll.services.FragmentService
@@ -31,6 +31,6 @@ import views.html.defaultpages.notFound
 abstract class OffPayrollController extends FrontendController with OffPayrollControllerHelper {
 
   val fragmentService = FragmentService("/guidance/")
-
+  val sessionCacheHelper: SessionCacheHelper
 
 }
