@@ -33,7 +33,7 @@ object InterviewSessionHelper {
       if (b.isEmpty) None
       else {
         val newPairs = if (popTo) a else a ::: List(b.head)
-        Some(session + (INTERVIEW_KEY -> StringEncodedMap(newPairs).asString), newPairs.last._1)
+        Some(session + (INTERVIEW_KEY -> StringEncodedMap(newPairs).asString), newPairs.lastOption.map(_._1).getOrElse(""))
       }
     }
   def peekOrPop(peek:Boolean)(session: Session): (Session, String) = {
