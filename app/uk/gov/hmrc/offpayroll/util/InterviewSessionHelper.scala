@@ -29,11 +29,10 @@ object InterviewSessionHelper {
   val popUntil = popToOrUntil(false) _
   def popToOrUntil(popTo:Boolean)(session: Session, questionTag: String):Option[(Session,String)] =
     session.data.get(INTERVIEW_KEY).flatMap { v =>
-      val pairs = StringEncodedMap(v).pairs
-      val index = pairs.indexWhere(_._1 == questionTag)
-      if (index == -1) None
+      val (a,b) = StringEncodedMap(v).pairs.span(_._1 != questionTag)
+      if (b.isEmpty) None
       else {
-        val newPairs: List[(String, String)] = pairs.take(index + (if (popTo) 0 else 1))
+        val newPairs = if (popTo) a else a ::: List(b.head)
         Some(session + (INTERVIEW_KEY -> StringEncodedMap(newPairs).asString), newPairs.last._1)
       }
     }
