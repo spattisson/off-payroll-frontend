@@ -28,13 +28,13 @@ object InterviewSessionHelper {
   val popTo = popToOrUntil(true) _
   val popUntil = popToOrUntil(false) _
   def popToOrUntil(popTo:Boolean)(session: Session, questionTag: String):Option[(Session,String)] =
-    session.data.get(INTERVIEW_KEY).flatMap { v =>
-      val (a,b) = StringEncodedMap(v).pairs.span(_._1 != questionTag)
-      if (b.isEmpty) None
-      else {
-        val newPairs = if (popTo) a else a ::: List(b.head)
-        Some(session + (INTERVIEW_KEY -> StringEncodedMap(newPairs).asString), newPairs.lastOption.map(_._1).getOrElse(""))
-      }
+    for {
+      v <- session.data.get(INTERVIEW_KEY)
+      (a,b) = StringEncodedMap(v).pairs.span(_._1 != questionTag)
+      h <- b.headOption
+    } yield {
+      val newPairs = if (popTo) a else a ::: List(h)
+      (session + (INTERVIEW_KEY -> StringEncodedMap(newPairs).asString), newPairs.lastOption.map(_._1).getOrElse(""))
     }
   def peekOrPop(peek:Boolean)(session: Session): (Session, String) = {
     val (newStringEncodedMap:StringEncodedMap, lastQuestion:String) = session.data.get(INTERVIEW_KEY) match {
