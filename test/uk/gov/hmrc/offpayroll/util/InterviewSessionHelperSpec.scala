@@ -99,4 +99,56 @@ class InterviewSessionHelperSpec extends FlatSpec with Matchers {
     topTag shouldBe ""
   }
 
+  it should "pop the values from the interview until (excluding) the given question tag" in {
+    val newSession = InterviewSessionHelper.push(mockSession, "t1", "a1")
+    val finalSession = InterviewSessionHelper.push(newSession, "t2", "a2")
+
+    val maybeSessionTag = InterviewSessionHelper.popTo(finalSession, "t2")
+    maybeSessionTag.isDefined shouldBe true
+    maybeSessionTag.map { case (updatedSession, questionTag) =>
+      questionTag shouldBe "t1"
+      InterviewSessionHelper.asMap(updatedSession) shouldBe Map("t1" -> "a1" )
+    }
+  }
+
+  it should "pop the values from the interview (until) returns none if tag is not found" in {
+    val newSession = InterviewSessionHelper.push(mockSession, "t1", "a1")
+    val finalSession = InterviewSessionHelper.push(newSession, "t2", "a2")
+
+    val maybeSessionTag = InterviewSessionHelper.popUntil(finalSession, "t3")
+    maybeSessionTag.isDefined shouldBe false
+  }
+
+  it should "pop the values from the interview to (including) the given question tag" in {
+    val newSession = InterviewSessionHelper.push(mockSession, "t1", "a1")
+    val finalSession = InterviewSessionHelper.push(newSession, "t2", "a2")
+
+    val maybeSessionTag = InterviewSessionHelper.popUntil(finalSession, "t2")
+    maybeSessionTag.isDefined shouldBe true
+    maybeSessionTag.map { case (updatedSession, questionTag) =>
+      questionTag shouldBe "t2"
+      InterviewSessionHelper.asMap(updatedSession) shouldBe Map("t1" -> "a1", "t2" -> "a2")
+    }
+  }
+
+  it should "pop the values from the interview to (including) the given question tag leaving interview empty if needed" in {
+    val newSession = InterviewSessionHelper.push(mockSession, "t1", "a1")
+    val finalSession = InterviewSessionHelper.push(newSession, "t2", "a2")
+
+    val maybeSessionTag = InterviewSessionHelper.popUntil(finalSession, "t1")
+    maybeSessionTag.isDefined shouldBe true
+    maybeSessionTag.map { case (updatedSession, questionTag) =>
+      questionTag shouldBe "t1"
+      InterviewSessionHelper.asMap(updatedSession) shouldBe Map("t1" -> "a1")
+    }
+  }
+
+  it should "pop the values from the interview (to) returns none if tag is not found" in {
+    val newSession = InterviewSessionHelper.push(mockSession, "t1", "a1")
+    val finalSession = InterviewSessionHelper.push(newSession, "t2", "a2")
+
+    val maybeSessionTag = InterviewSessionHelper.popUntil(finalSession, "t3")
+    maybeSessionTag.isDefined shouldBe false
+  }
+
 }
