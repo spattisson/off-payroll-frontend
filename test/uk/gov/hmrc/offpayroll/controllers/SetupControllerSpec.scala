@@ -57,7 +57,7 @@ class SetupControllerSpec extends UnitSpec with WithTestFakeApplication with Sca
   "Submitting the first question to the Setup Controller" should {
     " the second question in the SetupCluster" in {
       val request = FakeRequest().withFormUrlEncodedBody(
-        setup_endUserRolePersonDoingWork
+        "setup.endUserRole[0]" -> "setup.endUserRole.personDoingWork"
       )
       val result = SetupController.apply.processElement(0)(request).futureValue
       status(result) shouldBe Status.OK

@@ -23,6 +23,7 @@ import org.scalatest.{FlatSpec, Matchers}
   */
 class ClusterSpec extends FlatSpec with Matchers {
 
+  //todo complete this test
   "An abstract Cluster should " should " provide a method to check all interview questions have been answered " in {
 
   }

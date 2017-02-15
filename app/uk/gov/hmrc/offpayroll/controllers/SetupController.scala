@@ -58,7 +58,7 @@ class SetupController @Inject() extends OffPayrollController {
       fragmentService.getFragmentByName(element.questionTag))).withSession(session))
   }
 
-  override def displaySuccess(element: Element, questionForm: Form[String])(html: Html)(implicit request: Request[_]): Result =
+  override def displaySuccess(element: Element, questionForm: Form[_])(html: Html)(implicit request: Request[_]): Result =
     Ok(uk.gov.hmrc.offpayroll.views.html.interview.setup(questionForm, element, html))
 
   override def redirect: Result = Redirect(routes.SetupController.begin())
@@ -85,9 +85,10 @@ class SetupController @Inject() extends OffPayrollController {
             formWithErrors, element, fragmentService.getFragmentByName(element.questionTag)))) },
 
       value => {
-        val session = push(request.session, fieldName, value)
+        val formValue = value.mkString("|")
+        val session = push(request.session, fieldName, formValue)
 
-        val setupResult = flow.shouldAskForNext(asMap(session), (fieldName, value))
+        val setupResult = flow.shouldAskForNext(asMap(session), (fieldName, formValue))
         if (setupResult.maybeElement.nonEmpty) {
           // continue setup
           Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.setup(form, setupResult.maybeElement.get,

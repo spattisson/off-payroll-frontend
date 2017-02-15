@@ -44,7 +44,7 @@ class ExitControllerSpec extends UnitSpec with WithTestFakeApplication with Scal
   "POST /exit/element/0 with officeholder no" should {
     "redirect to Personal Service" in {
       val request = FakeRequest().withFormUrlEncodedBody(
-        officeHolderNo
+        "exit.officeHolder[0]" -> NO
       )
       val result = ExitController.apply.processElement(0)(request).futureValue
       status(result) shouldBe Status.SEE_OTHER
@@ -55,7 +55,7 @@ class ExitControllerSpec extends UnitSpec with WithTestFakeApplication with Scal
   "POST /exit/element/0 with officeholder yes" should {
     "return a HardDecision" in {
       val request = FakeRequest().withFormUrlEncodedBody(
-        officeHolderYes
+        "exit.officeHolder[0]" -> YES
       )
       val result = ExitController.apply.processElement(0)(request).futureValue
       status(result) shouldBe Status.OK

@@ -54,7 +54,7 @@ class ExitController  @Inject() extends OffPayrollController {
       fragmentService.getFragmentByName(element.questionTag))))
   }
 
-  override def displaySuccess(element: Element, questionForm: Form[String])(html: Html)(implicit request: Request[_]) = {
+  override def displaySuccess(element: Element, questionForm: Form[_])(html: Html)(implicit request: Request[_]) = {
     Ok(uk.gov.hmrc.offpayroll.views.html.interview.exit(questionForm, element, html))
   }
 
@@ -74,8 +74,10 @@ class ExitController  @Inject() extends OffPayrollController {
             formWithErrors, element, fragmentService.getFragmentByName(element.questionTag)))) },
 
       value => {
-        val session = push(request.session, fieldName, value)
-        val inIr35 = flow.shouldAskForNext(asMap(session), (fieldName, value)).inIr35
+
+        val formValue = value.mkString("|")
+        val session = push(request.session, fieldName, formValue)
+        val inIr35 = flow.shouldAskForNext(asMap(session), (fieldName, formValue)).inIr35
 
         if(inIr35) {
           Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.hardDecision()))

@@ -55,10 +55,11 @@ class InterviewControllerSpec extends UnitSpec with WithTestFakeApplication with
     }
   }
 
+  private val personalServiceClientAgreedFormData = "personalService.workerSentActualSubstitute[0]" -> YES
   "POST /cluster/0/element/0" should {
     "return 200" in {
       val request = FakeRequest().withFormUrlEncodedBody(
-        personalService_workerSentActualSubstituteYesClientAgreed
+        personalServiceClientAgreedFormData
       )
       val result = new InterviewController(IR35FlowService(), new TestSessionHelper()).processElement(0, 0)(request).futureValue
       status(result) shouldBe Status.OK
@@ -69,7 +70,7 @@ class InterviewControllerSpec extends UnitSpec with WithTestFakeApplication with
   "POST /cluster/0/element/0 without a cookie" should {
     "intercept an exception" in {
       val request = FakeRequest().withFormUrlEncodedBody(
-        personalService_workerSentActualSubstituteYesClientAgreed
+        personalServiceClientAgreedFormData
       )
       intercept[NoSuchElementException]{InterviewController().processElement(0, 0)(request).futureValue}
     }
@@ -78,7 +79,7 @@ class InterviewControllerSpec extends UnitSpec with WithTestFakeApplication with
   "POST /cluster/0/element/0 with test correlation id" should {
     "return 200" in {
       val request = FakeRequest().withFormUrlEncodedBody(
-        personalService_workerSentActualSubstituteYesClientAgreed
+        personalServiceClientAgreedFormData
       )
       val flowService = new InstrumentedIR35FlowService
       val result = new InterviewController(flowService, new TestSessionHelper()).processElement(0, 0)(request).futureValue
