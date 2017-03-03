@@ -1,15 +1,14 @@
 @import uk.gov.hmrc.play.views.html.helpers
 @import uk.gov.hmrc.offpayroll.models.ElementType
 @import uk.gov.hmrc.offpayroll.controllers.routes
-@import uk.gov.hmrc.offpayroll.models.Decision
-@import uk.gov.hmrc.offpayroll.models.Element
+@import uk.gov.hmrc.offpayroll.models.{AnalyticsAnswers,Decision,Element}
 @import play.api.Play
 @import java.util.Date
 
 @import uk.gov.hmrc.offpayroll.models.Decision
 @import uk.gov.hmrc.offpayroll.models.{IN, OUT, UNKNOWN}
 
-@(decision: Decision, interview: List[(String, List[String])], esi: Boolean)(implicit request: Request[_], messages: Messages)
+@(decision: Decision, interview: List[(String, List[String])], esi: Boolean, gaAnswers: AnalyticsAnswers)(implicit request: Request[_], messages: Messages)
 
 @decisionType = @{decision.decision match {
     case IN => "in"
@@ -18,14 +17,11 @@
     case _ => "moreInfoNeeded"
 }}
 
-@decisionType
-
-
     @uk.gov.hmrc.offpayroll.views.html.main_template(
         title = "Off Payroll Decision",
         bodyClasses = None,
         mainClass = Option("decision"),
-        virtualPage = Some(s"decisionDisplay/$decisionType")
+        virtualPage = Some(s"decisionDisplay/$decisionType/${gaAnswers.contractStarted}/${gaAnswers.employed}")
     ) {
 
 

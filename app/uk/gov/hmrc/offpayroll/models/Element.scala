@@ -69,3 +69,5 @@ case object OUT extends DecisionType {
 case object UNKNOWN extends DecisionType {
   override val value: String = "decision.unknown"
 }
+
+case class AnalyticsAnswers(contractStarted: String, employed: String)
