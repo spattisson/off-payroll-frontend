@@ -79,12 +79,10 @@ object InterviewController {
 
 class InterviewController @Inject()(val flowService: FlowService, val sessionHelper: SessionHelper) extends OffPayrollController {
 
-
   val flow: Webflow = flowService.flow
 
-  override def beginSuccess(element: Element)(implicit request: Request[AnyContent]): Future[Result] = {
-    val form = createForm(element)
-    Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.interview(form, element,
+  override def beginSuccess(element: Element, form: Element => Form[String])(implicit request: Request[AnyContent]): Future[Result] = {
+    Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.interview(form(element), element,
       fragmentService.getFragmentByName(element.questionTag))))
   }
 

@@ -89,5 +89,5 @@ class TestOffpayrollController (mockResult: Result) extends OffPayrollController
 
   override def redirect: Result = mockResult
 
-  override def beginSuccess(element: Element)(implicit request: Request[AnyContent]): Future[Result] = Future(mockResult)
+  override def beginSuccess(element: Element, form: Element => Form[String])(implicit request: Request[AnyContent]): Future[Result] = Future(mockResult)
 }
