@@ -81,8 +81,8 @@ class InterviewController @Inject()(val flowService: FlowService, val sessionHel
 
   val flow: Webflow = flowService.flow
 
-  override def beginSuccess(element: Element, form: Element => Form[String])(implicit request: Request[AnyContent]): Future[Result] = {
-    Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.interview(form(element), element,
+  override def beginSuccess(element: Element)(implicit request: Request[AnyContent]): Future[Result] = {
+    Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.interview(emptyForm, element,
       fragmentService.getFragmentByName(element.questionTag))))
   }
 

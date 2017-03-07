@@ -64,11 +64,11 @@ abstract class OffPayrollController extends FrontendController  with OffPayrollC
     element.fold (
       Future.successful(Redirect(routes.SetupController.begin).withSession(request.session))
     ) (
-      beginSuccess(_, createForm)
+      beginSuccess(_)
     )
   }
 
-  def beginSuccess(element: Element, form: Element => Form[String])(implicit request:Request[AnyContent]): Future[Result]
+  def beginSuccess(element: Element)(implicit request:Request[AnyContent]): Future[Result]
 
   val emptyForm = Form(single("" -> text))
 }

@@ -46,10 +46,10 @@ class SetupController @Inject() extends OffPayrollController {
   val flow = SetupFlow
   val SETUP_CLUSTER_ID = 0
 
-  override def beginSuccess(element: Element, form: Element => Form[String])(implicit request: Request[AnyContent]): Future[Result] = {
+  override def beginSuccess(element: Element)(implicit request: Request[AnyContent]): Future[Result] = {
 
     val session = reset(request.session)
-    Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.setup(form(element), element,
+    Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.setup(emptyForm, element,
       fragmentService.getFragmentByName(element.questionTag))).withSession(session))
   }
 
