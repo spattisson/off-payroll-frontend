@@ -18,11 +18,12 @@ package uk.gov.hmrc.offpayroll.controllers
 
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
-import play.api.mvc.Request
+import play.api.mvc.{Request, Session}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
-import uk.gov.hmrc.offpayroll.resources._
-import uk.gov.hmrc.offpayroll.services.{IR35FlowService, InterviewEvaluation}
+import uk.gov.hmrc.offpayroll.models._
+import uk.gov.hmrc.offpayroll.resources.{partialInterview_hasContractStarted_Yes, _}
+import uk.gov.hmrc.offpayroll.services.{FlowService, IR35FlowService, InterviewEvaluation}
 import uk.gov.hmrc.offpayroll.{FrontendDecisionConnector, WithTestFakeApplication}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -47,9 +48,49 @@ class InterviewControllerSpec extends UnitSpec with WithFakeApplication with Sca
     }
   }
 
-  "GET /cluster/" should {
+  class TestFlowService extends FlowService {
+    override val flow: Webflow = new TestFlow
+
+    override def evaluateInterview(interview: Map[String, String], currentQnA: (String, String), correlationId: String):
+    Future[InterviewEvaluation] = ???
+
+    override def getStart(interview: Map[String, String]): Option[Element] = flow.getStart(interview)
+
+    override def getAbsoluteElement(clusterId: Int, elementId: Int): Element = ???
+
+    class TestFlow extends Webflow {
+      override def getNext(currentElement: Element): Option[Element] = ???
+
+      override def getStart(interview: Map[String, String]): Option[Element] =
+        Some(Element("tag", RADIO, 0, PersonalServiceCluster))
+
+      override def getElementById(clusterId: Int, elementId: Int): Option[Element] = ???
+
+      override def getElementByTag(tag: String): Option[Element] = ???
+
+      override def clusters: List[Cluster] = ???
+
+      override def getClusterByName(name: String): Cluster = ???
+    }
+  }
+
+  "GET /cluster/ without Session Interview" should {
+    "return 303" in {
+      val request = FakeRequest("GET", "/cluster/")
+      val result = await(InterviewController().begin.apply(request))
+      status(result) shouldBe Status.SEE_OTHER
+    }
+  }
+
+
+
+  "GET /cluster/ with Session Interview" should {
     "return 200" in {
-      val result = await(InterviewController().begin.apply(FakeRequest("GET", "/cluster/")))
+
+      val interviewController = new InterviewController(new TestFlowService, new TestSessionHelper)
+
+      val request = FakeRequest("GET", "/cluster/")
+      val result = await(interviewController.begin.apply(request))
       status(result) shouldBe Status.OK
     }
   }

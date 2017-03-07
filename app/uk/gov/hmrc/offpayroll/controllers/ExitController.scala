@@ -45,20 +45,8 @@ class ExitController  @Inject() extends OffPayrollController {
   val EXIT_CLUSTER_ID: Int = 0
 
 
-  def begin() = Action.async { implicit request =>
-
-    val element = flow.getStart(asMap(request.session))
-
-    element.fold (
-      Future.successful(Redirect(routes.SetupController.begin).withSession(request.session))
-    ) (
-      beginSuccess(_)
-    )
-  }
-
-  private def beginSuccess(element: Element)(implicit request:Request[AnyContent]) = {
+  def beginSuccess(element: Element)(implicit request:Request[AnyContent]) = {
     val questionForm = createForm(element)
-
     Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.exit(questionForm, element,
       fragmentService.getFragmentByName(element.questionTag))))
   }

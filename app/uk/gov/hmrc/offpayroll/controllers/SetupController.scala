@@ -23,7 +23,7 @@ import play.api.Play.current
 import play.api.data.Form
 import play.api.data.Forms.{single, _}
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc.{Action, Request, Result}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.twirl.api.Html
 import uk.gov.hmrc.offpayroll.models.{Element, ExitReason, SetupCluster, SetupFlow}
 import uk.gov.hmrc.offpayroll.services.FragmentService
@@ -46,10 +46,8 @@ class SetupController @Inject() extends OffPayrollController {
   val flow = SetupFlow
   val SETUP_CLUSTER_ID = 0
 
-  //todo shouldn't need the clusterId
-  def begin(clusterId: Int = 0) = Action.async { implicit request =>
+  override def beginSuccess(element: Element)(implicit request: Request[AnyContent]): Future[Result] = {
 
-    val element = flow.getStart(asMap(request.session)).get
     val questionForm = createForm(element)
     val session = reset(request.session)
 
@@ -96,6 +94,5 @@ class SetupController @Inject() extends OffPayrollController {
       }
     )
   }
-
 
 }

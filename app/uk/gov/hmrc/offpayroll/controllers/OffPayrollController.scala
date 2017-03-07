@@ -24,7 +24,7 @@ import play.api.data.Forms.single
 import play.api.mvc.{Request, Result}
 import play.twirl.api.Html
 import uk.gov.hmrc.offpayroll.models.{Element, ExitFlow, Webflow}
-import uk.gov.hmrc.offpayroll.util.InterviewSessionStack.{peek, pop}
+import uk.gov.hmrc.offpayroll.util.InterviewSessionStack.{asMap, peek, pop}
 import play.api.data.Forms.text
 import play.api.mvc._
 
@@ -56,6 +56,20 @@ abstract class OffPayrollController extends FrontendController  with OffPayrollC
       case None => Future.successful(redirect.withSession(peekSession))
     }
   }
+
+  def begin() = Action.async { implicit request =>
+
+    val element = flow.getStart(asMap(request.session))
+
+    element.fold (
+      Future.successful(Redirect(routes.SetupController.begin).withSession(request.session))
+    ) (
+      beginSuccess(_)
+    )
+  }
+
+  def beginSuccess(element: Element)(implicit request:Request[AnyContent]): Future[Result]
+
 
   val emptyForm = Form(single("" -> text))
 }

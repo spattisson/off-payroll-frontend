@@ -100,9 +100,9 @@ object PersonalServiceCluster extends Cluster {
   }
 
   override def getStart(interview: Map[String, String]): Option[Element] =
-    interview.find { case (q, _) => q == "setup.hasContractStarted" }.flatMap { case (_, a) =>
-      if (a.toUpperCase == "YES") clusterElements.find {
-        _.questionTag == "possibleSubstituteRejection"
+    interview.find { case (q, _) => q == "setup.hasContractStarted" }.flatMap { case (q, a) =>
+      if (a.toUpperCase == "NO") clusterElements.find {
+        _.questionTag == name + ".possibleSubstituteRejection"
       }
       else clusterElements.headOption
     }

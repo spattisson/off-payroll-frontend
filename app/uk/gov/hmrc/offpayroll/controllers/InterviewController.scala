@@ -82,17 +82,14 @@ class InterviewController @Inject()(val flowService: FlowService, val sessionHel
 
   val flow: Webflow = flowService.flow
 
-  def begin = Action.async { implicit request =>
-
-    val element = flowService.getStart(asMap(request.session)).get
+  override def beginSuccess(element: Element)(implicit request: Request[AnyContent]): Future[Result] = {
     val form = createForm(element)
-
     Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.interview(form, element,
       fragmentService.getFragmentByName(element.questionTag))))
   }
 
   override def displaySuccess(element: Element, questionForm: Form[_])(html: Html)(implicit request: Request[_]): Result =
-    Ok(uk.gov.hmrc.offpayroll.views.html.interview.interview(questionForm, element, html))
+  Ok(uk.gov.hmrc.offpayroll.views.html.interview.interview(questionForm, element, html))
 
   override def redirect: Result = Redirect(routes.ExitController.back)
 
@@ -105,8 +102,8 @@ class InterviewController @Inject()(val flowService: FlowService, val sessionHel
       case GROUP => {
         val newForm = createListForm(element).bindFromRequest
         newForm.fold(
-          formWithErrors => handleFormError(element, fieldName, newForm, formWithErrors),
-          value => {
+        formWithErrors => handleFormError(element, fieldName, newForm, formWithErrors),
+        value => {
             evaluateInteview(element, fieldName, value.mkString("|","|",""), newForm)
           }
         )
@@ -116,8 +113,8 @@ class InterviewController @Inject()(val flowService: FlowService, val sessionHel
       case _ => {
         val newForm = createForm(element).bindFromRequest
         newForm.fold(
-          formWithErrors => handleFormError(element, fieldName, newForm, formWithErrors),
-          value => {
+        formWithErrors => handleFormError(element, fieldName, newForm, formWithErrors),
+        value => {
             evaluateInteview(element, fieldName, value, newForm)
           }
         )
@@ -133,8 +130,8 @@ class InterviewController @Inject()(val flowService: FlowService, val sessionHel
   private def handleFormError(element: Element, fieldName: String, newForm: Form[_], formWithErrors: Form[_])(implicit request : play.api.mvc.Request[_]) = {
     Logger.debug("****************** " + fieldName + " " + newForm.data.mkString("~"))
     Future.successful(BadRequest(
-      uk.gov.hmrc.offpayroll.views.html.interview.interview(
-        formWithErrors, element, fragmentService.getFragmentByName(element.questionTag))))
+    uk.gov.hmrc.offpayroll.views.html.interview.interview(
+    formWithErrors, element, fragmentService.getFragmentByName(element.questionTag))))
   }
 
   private def evaluateInteview(element: Element, fieldName: String, formValue: String, form: Form[_])(implicit request : play.api.mvc.Request[_]) = {
@@ -143,10 +140,10 @@ class InterviewController @Inject()(val flowService: FlowService, val sessionHel
     val result = flowService.evaluateInterview(asMap(session), (fieldName, formValue), sessionHelper.createCorrelationId(request))
 
     result.map(
-      decision => {
+    decision => {
         if (decision.continueWithQuestions) {
           Ok(uk.gov.hmrc.offpayroll.views.html.interview.interview(
-            form, decision.element.head, fragmentService.getFragmentByName(decision.element.head.questionTag)))
+          form, decision.element.head, fragmentService.getFragmentByName(decision.element.head.questionTag)))
             .withSession(session)
         } else {
           Ok(uk.gov.hmrc.offpayroll.views.html.interview.display_decision(decision.decision.head, asRawList(session), esi(asMap(session))))
@@ -156,8 +153,9 @@ class InterviewController @Inject()(val flowService: FlowService, val sessionHel
   }
 
   private def esi(interview: Map[String, String]): Boolean = {
-      interview.exists{
+    interview.exists{
         case (question, answer) => "setup.provideServices.soleTrader" == answer
       }
   }
+
 }
