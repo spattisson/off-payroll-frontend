@@ -1,4 +1,5 @@
 @import uk.gov.hmrc.offpayroll.models._
+@import uk.gov.hmrc.offpayroll.util._
 @import uk.gov.hmrc.offpayroll.models.Element
 
 @import uk.gov.hmrc.offpayroll.models.RADIO
@@ -113,6 +114,7 @@
                     <li>@interviewElement.toString</li>
                 }
             </ul>
+            <p>@CompressedInterview(request.session.data.get("interview").get).asValues.mkString("|")</p>
         }
     </div>
 }

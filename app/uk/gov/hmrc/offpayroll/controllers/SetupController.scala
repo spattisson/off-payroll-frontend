@@ -49,7 +49,7 @@ class SetupController @Inject() extends OffPayrollController {
   //todo shouldn't need the clusterId
   def begin(clusterId: Int = 0) = Action.async { implicit request =>
 
-    val element = flow.getStart(asMap(request.session))
+    val element = flow.getStart(asMap(request.session)).get
     val questionForm = createForm(element)
     val session = reset(request.session)
 
@@ -65,7 +65,7 @@ class SetupController @Inject() extends OffPayrollController {
 
   def processElement(elementID: Int) = Action.async { implicit request =>
 
-    val element = flow.getElementById(SETUP_CLUSTER_ID, elementID).getOrElse(flow.getStart(asMap(request.session)))
+    val element = flow.getElementById(SETUP_CLUSTER_ID, elementID).getOrElse(flow.getStart(asMap(request.session)).get)
     val fieldName = element.questionTag
     val form = createForm(element)
 
