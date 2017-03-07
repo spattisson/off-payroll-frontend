@@ -30,6 +30,7 @@ import play.twirl.api.Html
 import uk.gov.hmrc.offpayroll.filters.SessionIdFilter._
 import uk.gov.hmrc.offpayroll.models.{Element, GROUP, Webflow}
 import uk.gov.hmrc.offpayroll.services.{FlowService, IR35FlowService}
+import uk.gov.hmrc.offpayroll.util.InterviewSessionStack
 import uk.gov.hmrc.offpayroll.util.InterviewSessionStack.{asMap, asRawList, push}
 
 import scala.concurrent.Future
@@ -93,7 +94,12 @@ class InterviewController @Inject()(val flowService: FlowService, val sessionHel
 
   def processElement(clusterID: Int, elementID: Int) = Action.async { implicit request =>
 
-    val element = flowService.getAbsoluteElement(clusterID, elementID)
+    // check current index is the same as the element passed.
+
+    val element = InterviewSessionStack.currentIndex(request.session)
+
+    Logger.info(" ********************** found " + element + " in the InterviewSessionStack")
+
     val fieldName = element.questionTag
 
     element.elementType match {
@@ -140,9 +146,12 @@ class InterviewController @Inject()(val flowService: FlowService, val sessionHel
     result.map(
     decision => {
         if (decision.continueWithQuestions) {
+
+          val sessionWithcurrentIndex = InterviewSessionStack.addCurrentIndex(session, decision.element.head)
+
           Ok(uk.gov.hmrc.offpayroll.views.html.interview.interview(
           form, decision.element.head, fragmentService.getFragmentByName(decision.element.head.questionTag)))
-            .withSession(session)
+            .withSession(sessionWithcurrentIndex)
         } else {
           Ok(uk.gov.hmrc.offpayroll.views.html.interview.display_decision(decision.decision.head, asRawList(session), esi(asMap(session))))
         }
