@@ -94,11 +94,13 @@ class InterviewController @Inject()(val flowService: FlowService, val sessionHel
 
   def processElement(clusterID: Int, elementID: Int) = Action.async { implicit request =>
 
-    // check current index is the same as the element passed.
+//     check current index is the same as the element passed.
 
-    val element = InterviewSessionStack.currentIndex(request.session)
+//    val element = InterviewSessionStack.currentIndex(request.session)
 
-    Logger.info(" ********************** found " + element + " in the InterviewSessionStack")
+//    Logger.info(" ********************** found " + element + " in the InterviewSessionStack")
+
+    val element = flowService.getAbsoluteElement(clusterID, elementID)
 
     val fieldName = element.questionTag
 
