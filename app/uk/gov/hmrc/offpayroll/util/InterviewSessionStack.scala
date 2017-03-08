@@ -23,7 +23,7 @@ import scala.util.Try
 
 object InterviewSessionStack {
   val INTERVIEW_KEY = "interview"
-  val INTEVIEW_CURRENT_INDEX = "index"
+  val INTERVIEW_CURRENT_INDEX = "index"
 
   def push(session: Session, values: String, element: Element): Session = {
     val compressed = session.data.getOrElse(INTERVIEW_KEY, "")
@@ -55,17 +55,11 @@ object InterviewSessionStack {
   def asList(session: Session): List[(String, String)] =
     session.data.get(INTERVIEW_KEY).map(CompressedInterview(_).asList).getOrElse(List())
 
-  def addCurrentIndex(session: Session, currentElement: Element): Session = {
-    InterviewStack.elementIndex(currentElement).fold(
-      session
-    ) (
-      index =>
-      session + (INTEVIEW_CURRENT_INDEX -> index.toString)
-    )
-  }
+  def addCurrentIndex(session: Session, currentElement: Element): Session =
+    session + (INTERVIEW_CURRENT_INDEX -> InterviewStack.elementIndex(currentElement).fold("0")(_.toString))
 
   def currentIndex(session: Session): Element = {
-    val maybeIndex = session.data.get(INTEVIEW_CURRENT_INDEX).flatMap{indexStr => Try(indexStr.toInt).toOption}
-    ElementProvider.toElements(maybeIndex.getOrElse(4))
+    val maybeIndex = session.data.get(INTERVIEW_CURRENT_INDEX).flatMap{ indexStr => Try(indexStr.toInt).toOption}
+    ElementProvider.toElements(maybeIndex.getOrElse(0))
   }
 }
