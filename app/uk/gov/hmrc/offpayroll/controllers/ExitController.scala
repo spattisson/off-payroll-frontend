@@ -25,6 +25,7 @@ import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
 import play.twirl.api.Html
 import uk.gov.hmrc.offpayroll.models.{Element, ExitFlow, ExitReason, PersonalServiceCluster}
+import uk.gov.hmrc.offpayroll.services.IR35FlowService
 import uk.gov.hmrc.offpayroll.util.InterviewSessionStack
 import uk.gov.hmrc.offpayroll.util.InterviewSessionStack.{asMap, pop, push}
 
@@ -84,7 +85,7 @@ class ExitController  @Inject() extends OffPayrollController {
             Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.hardDecision()))
           } else {
             Future.successful(Redirect(routes.InterviewController.begin).
-              withSession(InterviewSessionStack.addCurrentIndex(session, PersonalServiceCluster.clusterElements(0)))) // TODO remove the hack here
+              withSession(InterviewSessionStack.addCurrentIndex(session, IR35FlowService().getStart(asMap(session)).get))) // TODO remove the hack here
           }
         }
       )
