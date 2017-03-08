@@ -170,4 +170,10 @@ class InterviewSessionStackSpec extends FlatSpec with Matchers {
     element shouldBe ElementProvider.toElements(0)
   }
 
+  it should "provide default element if non numeric index is set" in {
+    val newSession = mockSession + (INTERVIEW_CURRENT_INDEX -> "ABC")
+    val element = InterviewSessionStack.currentIndex(newSession)
+    element shouldBe ElementProvider.toElements(0)
+  }
+
 }
