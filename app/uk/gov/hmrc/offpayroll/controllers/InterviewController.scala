@@ -101,34 +101,39 @@ class InterviewController @Inject()(val flowService: FlowService, val sessionHel
 //    Logger.info(" ********************** found " + element + " in the InterviewSessionStack")
 
     val element = flowService.getAbsoluteElement(clusterID, elementID)
-
-    val fieldName = element.questionTag
-
-    element.elementType match {
-      case GROUP => {
-        val newForm = createListForm(element).bindFromRequest
-        newForm.fold(
-        formWithErrors => handleFormError(element, fieldName, newForm, formWithErrors),
-        value => {
-            evaluateInteview(element, fieldName, value.mkString("|","|",""), newForm)
-          }
-        )
-
-      }
-
-      case _ => {
-        val newForm = createForm(element).bindFromRequest
-        newForm.fold(
-        formWithErrors => handleFormError(element, fieldName, newForm, formWithErrors),
-        value => {
-            evaluateInteview(element, fieldName, value, newForm)
-          }
-        )
-
-      }
+    val indexElement = InterviewSessionStack.currentIndex(request.session)
+    if (element != indexElement){
+      Future.successful(BadRequest(s"bad (interview) got ${element.questionTag}, index is ${indexElement.questionTag}"))
     }
+    else {
 
+      val fieldName = element.questionTag
 
+      element.elementType match {
+        case GROUP => {
+          val newForm = createListForm(element).bindFromRequest
+          newForm.fold(
+            formWithErrors => handleFormError(element, fieldName, newForm, formWithErrors),
+            value => {
+              evaluateInteview(element, fieldName, value.mkString("|", "|", ""), newForm)
+            }
+          )
+
+        }
+
+        case _ => {
+          val newForm = createForm(element).bindFromRequest
+          newForm.fold(
+            formWithErrors => handleFormError(element, fieldName, newForm, formWithErrors),
+            value => {
+              evaluateInteview(element, fieldName, value, newForm)
+            }
+          )
+
+        }
+      }
+
+    }
 
   }
 

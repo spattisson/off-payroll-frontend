@@ -103,11 +103,8 @@
 @if(Play.current.configuration.getBoolean("ui.debug").getOrElse(false)) {
     <div style="clear:both" >
         <p>Debug is on!</p>
+        <h1>Current element @InterviewStack.elementIndex(element).getOrElse(-1).toString</h1>
         <ul>
-                        <li><b>Headers</b></li>
-                       @for(header <- request.headers.headers) {
-                           <li>@header</li>
-                       }
                         <li><b>Session</b></li>
                         @for((key, value) <- request.session.data) {
                             <li>@key -> @value</li>
@@ -122,6 +119,13 @@
                 }
             </ul>
             <p>@CompressedInterview(request.session.data.get("interview").get).asValues.mkString("|")</p>
+        }
+        <p>Index:</p>
+        @if(request.session.data.get("index").isDefined) {
+            <ul>
+                    <li>@request.session.data.get("index").get</li>
+                    <li>@ElementProvider.toElements(request.session.data.get("index").get.toInt).questionTag</li>
+            </ul>
         }
     </div>
 }

@@ -25,9 +25,10 @@ import play.api.data.Forms.{single, _}
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.twirl.api.Html
-import uk.gov.hmrc.offpayroll.models.{Element, ExitReason, SetupCluster, SetupFlow}
+import uk.gov.hmrc.offpayroll.models._
 import uk.gov.hmrc.offpayroll.services.FragmentService
-import uk.gov.hmrc.offpayroll.util.InterviewSessionStack.{asMap, pop, push, reset}
+import uk.gov.hmrc.offpayroll.util.InterviewSessionStack
+import uk.gov.hmrc.offpayroll.util.InterviewSessionStack._
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
@@ -50,7 +51,7 @@ class SetupController @Inject() extends OffPayrollController {
 
     val session = reset(request.session)
     Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.setup(emptyForm, element,
-      fragmentService.getFragmentByName(element.questionTag))).withSession(session))
+      fragmentService.getFragmentByName(element.questionTag))).withSession(addCurrentIndex(session,element)))
   }
 
   override def displaySuccess(element: Element, questionForm: Form[_])(html: Html)(implicit request: Request[_]): Result =
@@ -62,6 +63,11 @@ class SetupController @Inject() extends OffPayrollController {
   def processElement(elementID: Int) = Action.async { implicit request =>
 
     val element = flow.getElementById(SETUP_CLUSTER_ID, elementID).getOrElse(flow.getStart(asMap(request.session)).get)
+    val indexElement = InterviewSessionStack.currentIndex(request.session)
+    if (element != indexElement){
+      Future.successful(BadRequest(s"bad (setup) got ${element.questionTag}, index is ${indexElement.questionTag}"))
+    }
+    else {
     val fieldName = element.questionTag
     val form = createForm(element)
 
@@ -79,18 +85,20 @@ class SetupController @Inject() extends OffPayrollController {
           // continue setup
           Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.setup(form, setupResult.maybeElement.get,
             fragmentService.getFragmentByName(setupResult.maybeElement.get.questionTag)))
-            .withSession(session)
+            .withSession(addCurrentIndex(session,setupResult.maybeElement.get))
           )
         } else if (setupResult.exitTool) {
           val exitReason = ExitReason("exitTool.soleTrader.heading", "exitTool.soleTrader.reason", "exitTool.soleTrader.explanation")
-          Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.exitTool(exitReason)))
+          Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.exitTool(exitReason))
+            .withSession(session))
         }
         else {
           // ExitCluster
-          Future.successful(Redirect(routes.ExitController.begin()).withSession(session))
+          Future.successful(Redirect(routes.ExitController.begin()).withSession(addCurrentIndex(session,ExitCluster.clusterElements(0)))) // TODO remove this hack
         }
       }
     )
+    }
   }
 
 }

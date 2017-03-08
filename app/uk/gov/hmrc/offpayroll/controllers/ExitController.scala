@@ -24,8 +24,8 @@ import play.api.data.Form
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
 import play.twirl.api.Html
-import uk.gov.hmrc.offpayroll.models.{Element, ExitFlow, ExitReason}
-
+import uk.gov.hmrc.offpayroll.models.{Element, ExitFlow, ExitReason, PersonalServiceCluster}
+import uk.gov.hmrc.offpayroll.util.InterviewSessionStack
 import uk.gov.hmrc.offpayroll.util.InterviewSessionStack.{asMap, pop, push}
 
 import scala.concurrent.Future
@@ -61,25 +61,33 @@ class ExitController  @Inject() extends OffPayrollController {
   def processElement(elementID: Int) = Action.async { implicit request =>
 
     val element = flow.getElementById(EXIT_CLUSTER_ID, elementID).get
-    val fieldName = element.questionTag
-    val form = createForm(element)
+    val indexElement = InterviewSessionStack.currentIndex(request.session)
+    if (element != indexElement){
+      Future.successful(BadRequest(s"bad (exit) got ${element.questionTag}, index is ${indexElement.questionTag}"))
+    }
+    else {
+      val fieldName = element.questionTag
+      val form = createForm(element)
 
-    form.bindFromRequest.fold (
-      formWithErrors => {
-        Future.successful(BadRequest(
-          uk.gov.hmrc.offpayroll.views.html.interview.exit(
-            formWithErrors, element, fragmentService.getFragmentByName(element.questionTag)))) },
+      form.bindFromRequest.fold(
+        formWithErrors => {
+          Future.successful(BadRequest(
+            uk.gov.hmrc.offpayroll.views.html.interview.exit(
+              formWithErrors, element, fragmentService.getFragmentByName(element.questionTag))))
+        },
 
-      value => {
-        val session = push(request.session, value, element)
-        val inIr35 = flow.shouldAskForNext(asMap(session), (fieldName, value)).inIr35
+        value => {
+          val session = push(request.session, value, element)
+          val inIr35 = flow.shouldAskForNext(asMap(session), (fieldName, value)).inIr35
 
-        if(inIr35) {
-          Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.hardDecision()))
-        } else {
-          Future.successful(Redirect(routes.InterviewController.begin).withSession(session))
+          if (inIr35) {
+            Future.successful(Ok(uk.gov.hmrc.offpayroll.views.html.interview.hardDecision()))
+          } else {
+            Future.successful(Redirect(routes.InterviewController.begin).
+              withSession(InterviewSessionStack.addCurrentIndex(session, PersonalServiceCluster.clusterElements(0)))) // TODO remove the hack here
+          }
         }
-      }
-    )
+      )
+    }
   }
 }
