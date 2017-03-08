@@ -24,6 +24,7 @@ import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.offpayroll.models._
 import uk.gov.hmrc.offpayroll.resources.{partialInterview_hasContractStarted_Yes, _}
 import uk.gov.hmrc.offpayroll.services.{FlowService, IR35FlowService, InterviewEvaluation}
+import uk.gov.hmrc.offpayroll.util.{ElementProvider, InterviewSessionStack, InterviewStack}
 import uk.gov.hmrc.offpayroll.{FrontendDecisionConnector, WithTestFakeApplication}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -34,6 +35,8 @@ class InterviewControllerSpec extends UnitSpec with WithFakeApplication with Sca
 
 
   val TEST_SESSION_ID = "41c1fc6444bb7e"
+  private val mockSessionAsPair = (InterviewSessionStack.INTERVIEW_CURRENT_INDEX, InterviewStack.elementIndex(PersonalServiceCluster.clusterElements(0)).getOrElse(0).toString)
+
 
   class TestSessionHelper extends SessionHelper {
     override def createCorrelationId(request: Request[_]): String = TEST_SESSION_ID
@@ -97,7 +100,8 @@ class InterviewControllerSpec extends UnitSpec with WithFakeApplication with Sca
 
   "POST /cluster/0/element/0" should {
     "return 200" in {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = FakeRequest().withSession(mockSessionAsPair)
+      .withFormUrlEncodedBody(
         personalService_workerSentActualSubstituteYesClientAgreed
       )
       val result = new InterviewController(IR35FlowService(), new TestSessionHelper()).processElement(0, 0)(request).futureValue
@@ -108,7 +112,8 @@ class InterviewControllerSpec extends UnitSpec with WithFakeApplication with Sca
 
   "POST /cluster/0/element/0 without a cookie" should {
     "intercept an exception" in {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = FakeRequest().withSession(mockSessionAsPair)
+      .withFormUrlEncodedBody(
         personalService_workerSentActualSubstituteYesClientAgreed
       )
       intercept[NoSuchElementException]{InterviewController().processElement(0, 0)(request).futureValue}
@@ -117,7 +122,8 @@ class InterviewControllerSpec extends UnitSpec with WithFakeApplication with Sca
 
   "POST /cluster/0/element/0 with test correlation id" should {
     "return 200" in {
-      val request = FakeRequest().withFormUrlEncodedBody(
+      val request = FakeRequest().withSession(mockSessionAsPair)
+      .withFormUrlEncodedBody(
         personalService_workerSentActualSubstituteYesClientAgreed
       )
       val flowService = new InstrumentedIR35FlowService
